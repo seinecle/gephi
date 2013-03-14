@@ -36,7 +36,7 @@ Version 3 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 
 Contributor(s):
-
+Clement Levallois for the modification of the repulsion force
 Portions Copyrighted 2011 Gephi Consortium.
  */
 package org.gephi.layout.plugin.forceAtlas2;
@@ -140,7 +140,8 @@ public class ForceFactory {
 
             if (distance > 0) {
                 // NB: factor = force / distance
-                double factor = coefficient * n1Layout.mass * n2Layout.mass / distance / distance;
+                double factor = coefficient * (1/(Math.min(n1Layout.mass,n2Layout.mass)*Math.min(n1Layout.mass,n2Layout.mass))) / distance / distance;
+//                double factor = coefficient * n1Layout.mass * n2Layout.mass / distance / distance;
 
                 n1Layout.dx += xDist * factor;
                 n1Layout.dy += yDist * factor;
