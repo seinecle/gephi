@@ -47,18 +47,27 @@ import com.jogamp.opengl.glu.GLUquadric;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.impl.NodeImpl;
 import org.gephi.visualization.VizController;
 import org.gephi.visualization.VizModel;
 import org.gephi.visualization.apiimpl.Scheduler;
 import org.gephi.visualization.model.Model;
 import org.gephi.visualization.model.edge.EdgeModel;
 import org.gephi.visualization.model.edge.EdgeModeler;
+import org.gephi.visualization.model.node.Circle;
+import org.gephi.visualization.model.node.ClusterBoundary;
 import org.gephi.visualization.model.node.NodeModel;
 import org.gephi.visualization.model.node.NodeModeler;
+import org.gephi.visualization.model.node.Point;
+import org.gephi.visualization.model.node.SmallestEnclosingCircle;
 import org.gephi.visualization.octree.Octree;
 import org.gephi.visualization.scheduler.CompatibilityScheduler;
 import org.gephi.visualization.selection.Cylinder;
@@ -144,6 +153,9 @@ public class CompatibilityEngine extends AbstractEngine {
 
     @Override
     public void display(GL2 gl, GLU glu) {
+
+        Map<String, Set<Node>> clusters = new HashMap();
+
         markTime++;
 
         VizModel vizModel = VizController.getInstance().getVizModel();
@@ -183,9 +195,52 @@ public class CompatibilityEngine extends AbstractEngine {
             nodeModeler.beforeDisplay(gl, glu);
             for (Iterator<NodeModel> itr = octree.getNodeIterator(); itr.hasNext();) {
                 NodeModel obj = itr.next();
+
+                //maintaining a map of clusters and their nodes.
+                if (obj.getNode().getAttributeKeys().contains("cluster")) {
+                    String cluster = (String) obj.getNode().getAttribute("cluster");
+                    Set<Node> nodes = clusters.getOrDefault(cluster, new HashSet());
+                    nodes.add(obj.getNode());
+                    clusters.putIfAbsent(cluster, nodes);
+                }
                 if (obj.markTime != markTime) {
                     obj.display(gl, glu, vizModel);
                     obj.markTime = markTime;
+                }
+            }
+
+            for (String key : clusters.keySet()) {
+                Set<Node> nodes1 = clusters.get(key);
+                if (nodes1 != null) {
+                    float x = 0;
+                    float y = 0;
+                    float z = 0;
+                    List<Point> points = new ArrayList();
+                    float maxSize = 0;
+                    for (Node node : nodes1) {
+                        points.add(new Point((double) node.x(), (double) node.y()));
+                        maxSize = Math.max(maxSize, node.size());
+                    }
+                    Circle circle = SmallestEnclosingCircle.makeCircle(points);
+
+//                Node n = new NodeImpl(999);                
+//                octree.addNode(new ClusterBoundary((Node)n));
+                    int num_segments = 30;
+                    gl.glBegin(GL2.GL_LINE_LOOP);
+                    float r = (float) circle.r + maxSize;
+
+                    for (int ii = 0; ii < num_segments; ii++) {
+                        float theta = (float) (2.0 * 3.1415926 * (float) ii / (float) num_segments);
+
+                        float dx = (float) (r * Math.cos(theta));//calculate the x component 
+                        float dy = (float) (r * Math.sin(theta));//calculate the y component 
+
+                        gl.glVertex2f((float) dx + (float) circle.c.x, (float) dy + (float) circle.c.y);//output vertex 
+
+                    }
+                    gl.glEnd();
+                    gl.glPushMatrix();
+                    gl.glPopMatrix();
                 }
             }
             nodeModeler.afterDisplay(gl, glu);
@@ -523,7 +578,7 @@ public class CompatibilityEngine extends AbstractEngine {
 
                 forceHighlight();
             }
-            
+
             for (Model mdl : objs) {
                 if (mdl != null) {
                     mdl.setSelected(true);
@@ -552,18 +607,18 @@ public class CompatibilityEngine extends AbstractEngine {
         customSelection = false;
         configChanged = true;
         anySelected = false;
-        
+
         resetNodesSelection();
         resetEdgesSelection();
     }
-    
-    private void resetNodesSelection(){
+
+    private void resetNodesSelection() {
         for (NodeModel selectedNode : getSelectedNodes()) {
             selectedNode.setSelected(false);
         }
     }
-    
-    private void resetEdgesSelection(){
+
+    private void resetEdgesSelection() {
         for (EdgeModel selectedEdge : getSelectedEdges()) {
             selectedEdge.setSelected(false);
         }

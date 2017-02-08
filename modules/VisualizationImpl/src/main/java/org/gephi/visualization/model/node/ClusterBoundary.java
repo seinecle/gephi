@@ -48,12 +48,12 @@ import org.gephi.graph.api.Node;
 import org.gephi.lib.gleem.linalg.Vecf;
 import org.gephi.visualization.VizModel;
 
-public class NodeDiskModel extends NodeModel {
+public class ClusterBoundary extends NodeModel {
 
     public int modelType;
     public int modelBorderType;
 
-    public NodeDiskModel(Node node) {
+    public ClusterBoundary(Node node) {
         super(node);
     }
 
@@ -68,20 +68,6 @@ public class NodeDiskModel extends NodeModel {
             neighbor = true;
         }
         mark = false;
-
-        // drawing a circle around nodes.
-        
-//        GLUquadric quadric = glu.gluNewQuadric();
-//        glu.gluQuadricDrawStyle(quadric, GLU.GLU_FILL); // GLU_POINT, GLU_LINE, GLU_FILL, GLU_SILHOUETTE
-//        glu.gluQuadricNormals(quadric, GLU.GLU_NONE); // GLU_NONE, GLU_FLAT, or GLU_SMOOTH
-//        glu.gluQuadricTexture(quadric, false);
-//
-        gl.glPushMatrix();
-        float size = node.size() * 2;
-        gl.glTranslatef(node.x(), node.y(), node.z());
-        gl.glScalef(size, size, 1f);
-
-//        glu.gluDisk(quadric, 9, 10, 100, 100);
 
         if (!selec) {
             if (vizModel.getConfig().isLightenNonSelected()) {
