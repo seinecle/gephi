@@ -18,10 +18,9 @@
  * along with this program (see COPYING.txt).
  * If not, see <http://www.gnu.org/licenses/>.
  */
-package org.gephi.visualization.model.node;
+package net.clementlevallois.enclosingcircles;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
