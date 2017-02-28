@@ -195,8 +195,8 @@ public class CompatibilityEngine extends AbstractEngine {
                 NodeModel obj = itr.next();
 
                 //maintaining a map of clusters and their nodes.
-                if (obj.getNode().getAttributeKeys().contains("cluster")) {
-                    String cluster = (String) obj.getNode().getAttribute("cluster");
+                if (obj.getNode().getAttributeKeys().contains("Modularity Class")) {
+                    String cluster = (String) obj.getNode().getAttribute("Modularity Class");
                     Set<Node> nodes = clusters.getOrDefault(cluster, new HashSet());
                     nodes.add(obj.getNode());
                     clusters.putIfAbsent(cluster, nodes);
